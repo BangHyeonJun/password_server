@@ -1,0 +1,66 @@
+type SNS {
+    url: String!
+    code: Int!
+    image: String!
+}
+
+type Member {
+    _id: String!
+    email: String!
+    password: String!
+    avatar: String
+    nickname: String!
+    introduce: String
+    sns: [SNS]
+    join_date: String!
+    role: String!
+}
+
+type Query {
+    getMembers: [Member]
+    getMember(id: String!): Member
+    test(token: String!): String
+    getLoginMember: Member!
+}
+
+type Mutation {
+    signup(email: String!): Member!
+    setUserInfo(
+        id: String!
+        avatar: String
+        nickname: String
+        introduce: String
+        sns: [createSNS]
+    ): Member!
+    setPassword(id: String!, password: String!): Boolean!
+    login(email: String!, password: String!): String!
+}
+
+input createSNS {
+    name: String!
+    url: String!
+}
+
+#getMember(id: String!): Member
+# type Mutation {
+#     # checkMember(email: String!, password: String!): Member
+# }
+
+# type Mutation {
+#     insertMember(
+#         avatar: createImg
+#         userid: String!
+#         email: String
+#         introduce: String
+#         sns: [createSNS]
+#     ): Boolean!
+# }
+
+# input createImg {
+#     path: String!
+# }
+
+# input createSNS {
+#     url: String!
+#     path: String!
+# }

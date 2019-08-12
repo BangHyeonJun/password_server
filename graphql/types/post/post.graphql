@@ -1,0 +1,37 @@
+type Comment {
+    publish_date: String!
+    name: String!
+    content: String
+}
+
+type Img {
+    path: String!
+}
+
+type Post {
+    _id: String!
+    writer: String!
+    mainImg: String!
+    hashtag: [String]!
+    title: String!
+    publish_date: String!
+    text: String!
+    html: String!
+    comments: [Comment]
+}
+
+type Query {
+    getPosts: [Post]
+    getPost(id: String!): Post
+}
+
+type Mutation {
+    insertPost(
+        userID: String!
+        hashtag: String!
+        title: String!
+        text: String!
+        html: String!
+    ): Post!
+    UploadMainImg(postID: String, file: Upload!): File!
+}

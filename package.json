@@ -1,0 +1,36 @@
+{
+    "name": "my_blog_server",
+    "version": "1.0.0",
+    "description": "개인 블로그 서버",
+    "main": "index.js",
+    "repository": "https://github.com/BangHyeonJun/my_blog_server.git",
+    "author": "BangHyeonJun <bhj2849@naver.com>",
+    "license": "MIT",
+    "dependencies": {
+        "bcrypt": "^3.0.6",
+        "dotenv": "^8.0.0",
+        "express": "^4.17.1",
+        "express-session": "^1.16.2",
+        "graphql-shield": "^6.0.4",
+        "graphql-tools": "^4.0.5",
+        "graphql-upload": "^8.0.7",
+        "graphql-yoga": "^1.17.4",
+        "jsonwebtoken": "^8.5.1",
+        "merge-graphql-schemas": "^1.5.8",
+        "moment": "^2.24.0",
+        "moment-timezone": "^0.5.25",
+        "mongoose": "^5.5.11",
+        "ms": "^2.1.2",
+        "randomstring": "^1.1.5",
+        "sharp": "^0.23.0"
+    },
+    "scripts": {
+        "start": "nodemon --exec babel-node index.js",
+        "test": "jest"
+    },
+    "devDependencies": {
+        "babel-cli": "^6.26.0",
+        "babel-preset-env": "^1.7.0",
+        "babel-preset-stage-3": "^6.24.1"
+    }
+}
