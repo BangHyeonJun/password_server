@@ -2,12 +2,50 @@ import Member from "./memberSchema";
 import moment from "moment";
 import "moment-timezone";
 import bcrypt from "bcrypt";
-import randomstring from "randomstring";
 import createJWT from "../../middleware/createJWT";
-import SNS from "./sns";
 
 export default {
     Query: {
+        // 로그인 기능
+        signin: async (_, { email, password }) => {
+            if (!email || !password) {
+                throw new Error("이메일 또는 패스워드는 필수 값 입니다.");
+            }
+
+            const user = await Member.findOne({ email: email });
+
+            if (!user) {
+                throw new Error("해당 아이디는 존재하지 않습니다.");
+            }
+
+            if (user) {
+                if (await bcrypt.compareSync(password, user.password)) {
+                    const uId = user._id;
+                    const uRole = user.role;
+
+                    return createJWT(uId, uRole);
+                }
+
+                throw new Error("패스워드가 일치하지 않습니다.");
+            }
+
+            throw new Error("유저를 찾을수 없습니다.");
+        },
+
+        checkSession: async (parent, args, context) => {
+            const TokenUser = await context.req.user;
+            if (TokenUser) {
+                const member = await Member.findById(
+                    TokenUser._id
+                ).countDocuments();
+
+                if (member) {
+                    return true;
+                }
+            }
+            return false;
+        },
+
         getMembers: async (_, args) => {
             return await Member.find({});
         },
@@ -33,7 +71,7 @@ export default {
 
     Mutation: {
         // 회원가입
-        signup: async (_, { email }, ctx) => {
+        signup: async (_, { email, password }, ctx) => {
             // 입력된 email이 존재하는지 확인
             let user = await Member.find({ email: email }).count();
 
@@ -42,84 +80,37 @@ export default {
                 throw new Error("해당 이메일을 가진 유저가 존재합니다.");
             }
 
-            // 기본값으로 초기화
+            // 사용자 이메일, 패스워드 초기화
             const uEmail = email;
-            const uPassword = "nuguna-" + randomstring.generate(10);
-            const uNickname = "누구나-" + randomstring.generate(6);
-            moment.tz.setDefault("Asia/Seoul");
-            const uJoinDate = moment().format("YYYY-MM-DD HH:mm:ss");
+            const uPassword = password;
+            const uRole = "member";
 
             // 멤버 객체 생성
             const newbey = new Member({
                 email: uEmail,
                 password: await bcrypt.hashSync(uPassword, 10),
-                nickname: uNickname,
-                join_date: uJoinDate,
-                role: "member"
+                role: uRole
             });
 
             if (await newbey.save()) {
-                return {
-                    email: uEmail,
-                    password: uPassword
-                };
+                return true;
             } else {
                 throw new Error("회원을 정상적으로 저장하지 못하였습니다.");
             }
         },
 
-        // 정보 수정
-        setUserInfo: async (_, { id, avatar, nickname, introduce, sns }) => {
-            let param = new Object();
-
-            if (!id) {
-                throw new Error("아이디는 필수 값 입니다.");
-            }
-
-            if ((await Member.findById(id).count()) < 1) {
-                throw new Error("해당 아이디는 존재하지 않습니다.");
-            }
-
-            const userSNS = new Array();
-            for (let i in sns) {
-                let target = SNS[sns[i]["name"]];
-                let url = sns[i]["url"];
-                let form = {
-                    code: target["code"],
-                    image: target["image"],
-                    url: url
-                };
-                userSNS.push(form);
-            }
-            param["sns"] = userSNS;
-            param["introduce"] = introduce;
-            param["nickname"] = nickname;
-            param["avatar"] = avatar;
-
-            await Member.updateOne(
-                { _id: id },
-                { $set: param },
-                (err, collection) => {
-                    if (err) throw new Error(err);
-                    console.log("Record updated successfully");
-                }
-            );
-
-            return await Member.findById(id);
-        },
-
         // 패스워드 설정
-        setPassword: async (_, { id, password }) => {
-            if (!id) {
+        setPassword: async (_, { mId, email, password }) => {
+            if (!mId) {
                 throw new Error("아이디는 필수 값 입니다.");
             }
 
-            if ((await Member.findById(id).count()) < 1) {
+            if ((await Member.findById(mId).count()) < 1) {
                 throw new Error("해당 아이디는 존재하지 않습니다.");
             }
 
             await Member.updateOne(
-                { _id: id },
+                { _id: mId },
                 { $set: { password: await bcrypt.hashSync(password, 10) } },
                 (err, collection) => {
                     if (err) throw new Error(err);
@@ -128,32 +119,6 @@ export default {
             );
 
             return true;
-        },
-
-        // 로그인 기능
-        login: async (_, { email, password }) => {
-            if (!email || !password) {
-                throw new Error("이메일 또는 패스워드는 필수 값 입니다.");
-            }
-
-            const user = await Member.findOne({ email: email });
-
-            if (!user) {
-                throw new Error("해당 아이디는 존재하지 않습니다.");
-            }
-
-            if (user) {
-                if (await bcrypt.compareSync(password, user.password)) {
-                    const uId = user._id;
-                    const uRole = user.role;
-
-                    return createJWT(uId, uRole);
-                }
-
-                throw new Error("패스워드가 일치하지 않습니다.");
-            }
-
-            throw new Error("유저를 찾을수 없습니다.");
         }
     }
 };

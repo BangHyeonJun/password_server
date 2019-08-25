@@ -4,20 +4,23 @@ import { isAdmin, isManager, isMember, isAuthenticated } from "./role";
 const permission = shield({
     Query: {
         /* member */
+        signin: true,
+        checkSession: true,
         getLoginMember: isAdmin,
         getMember: or(isMember, isManager, isAdmin, isAuthenticated),
-        getMembers: or(isAdmin),
+        getMembers: or(isAdmin)
 
-        /* post */
-        getPosts: or(isAuthenticated, isAdmin),
-        getPost: or(isAdmin, isManager, isMember)
+        /* password */
     },
     Mutation: {
         /* member */
-        login: isAuthenticated,
-        setPassword: or(isMember, isAdmin),
-        signup: or(isMember, isAdmin),
-        setUserInfo: or(isMember, isAdmin)
+        signup: true,
+        setPassword: or(isMember, isManager, isAdmin, isAuthenticated),
+
+        /* password */
+        inputPassword: or(isMember),
+        editPassword: or(isMember, isManager, isAdmin, isAuthenticated),
+        deletePassword: or(isMember, isManager, isAdmin, isAuthenticated)
     }
 });
 

@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 4000;
 
 mongoose.Promise = global.Promise;
 
-mongoose.connect("mongodb://admin:admin123@ds044907.mlab.com:44907/blog", {
+mongoose.connect(process.env.mongo_url, {
     useNewUrlParser: true
 });
 mongoose.connection.once("open", () => {
@@ -24,7 +24,7 @@ mongoose.connection.once("open", () => {
 
 const opts = {
     port: process.env.PORT || 4000,
-    endpoint: "/blog",
+    endpoint: "/password",
     cors: {
         credentials: true,
         origin: ["http://localhost:3000"] // your frontend url.
@@ -48,7 +48,7 @@ const server = new GraphQLServer({
 });
 
 // 정적 이미지를 사용하기 위해서 적어놓음
-server.express.use("/blog", express.static("statics"));
+server.express.use("/password", express.static("statics"));
 
 // 인증을 위한 부분
 // server.express.use(auth);
