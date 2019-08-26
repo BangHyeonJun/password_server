@@ -6,6 +6,17 @@ import createJWT from "../../middleware/createJWT";
 
 export default {
     Query: {
+        getPassword: async (_, { id }, ctx) => {
+            const { _id } = await ctx.req.user;
+
+            if (!_id) {
+                throw new Error("세션이 만료되었습니다.");
+            }
+
+            console.log(await Password.find({ user: _id, _id: id }));
+            return await Password.findOne({ user: _id, _id: id });
+        },
+
         // 모든 패스워드 리스트를 불러옵니다.
         getPasswordList: async (_, args, ctx) => {
             const { _id } = await ctx.req.user;
@@ -40,7 +51,7 @@ export default {
                 id,
                 password,
                 description,
-                password: await bcrypt.hashSync(password, 10)
+                password: password
             });
 
             if (await pPassword.save()) {
