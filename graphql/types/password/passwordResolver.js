@@ -13,7 +13,6 @@ export default {
                 throw new Error("세션이 만료되었습니다.");
             }
 
-            console.log(await Password.find({ user: _id, _id: id }));
             return await Password.findOne({ user: _id, _id: id });
         },
 
@@ -25,7 +24,6 @@ export default {
                 throw new Error("세션이 만료되었습니다.");
             }
 
-            console.log(await Password.find({ user: _id }));
             return await Password.find({ user: _id });
         }
     },
@@ -55,7 +53,7 @@ export default {
             });
 
             if (await pPassword.save()) {
-                return true;
+                return await Password.find({ user: _id });
             } else {
                 throw new Error("회원을 정상적으로 저장하지 못하였습니다.");
             }
