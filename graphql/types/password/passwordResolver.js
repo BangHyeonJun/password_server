@@ -25,6 +25,19 @@ export default {
             }
 
             return await Password.find({ user: _id });
+        },
+        
+        // 필터에 맞는 것을 가져옵니다.
+        getPasswordWFilter: async (_, {filter}, ctx) => {
+            const { _id } = await ctx.req.user;
+
+            if (!_id) {
+                throw new Error("세션이 만료되었습니다.");
+            }
+
+            console.log(filter)
+
+            return await Password.find({$or:[{"id":filter},{"url":filter},{"site":filter},{"description":filter}]});
         }
     },
 
