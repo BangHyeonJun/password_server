@@ -3,6 +3,9 @@ import moment from "moment";
 import "moment-timezone";
 import bcrypt from "bcrypt";
 import createJWT from "../../middleware/createJWT";
+import Cryptr from "cryptr";
+
+// const cryptr = new Cryptr(process.env.password_sort);
 
 export default {
     Query: {
@@ -18,26 +21,53 @@ export default {
 
         // 모든 패스워드 리스트를 불러옵니다.
         getPasswordList: async (_, args, ctx) => {
-            const { _id } = await ctx.req.user;
+            try {
+                const { _id } = await ctx.req.user;
 
-            if (!_id) {
-                throw new Error("세션이 만료되었습니다.");
+                if (!_id) {
+                    throw new Error("세션이 만료되었습니다.");
+                }
+
+                const cryptr = new Cryptr(process.env.password_sort);
+
+                return await Password.find({ user: _id }, function(err, res) {
+                    if (err) {
+                        return new Error("리스트 에러");
+                    }
+
+                    const result = res.map(item => ({
+                        ...item,
+                        _doc: {
+                            ...item._doc,
+                            password: cryptr.decrypt(item.password)
+                        }
+                    }));
+
+                    console.log(result);
+                });
+            } catch (e) {
+                return e;
             }
-
-            return await Password.find({ user: _id });
         },
-        
+
         // 필터에 맞는 것을 가져옵니다.
-        getPasswordWFilter: async (_, {filter}, ctx) => {
+        getPasswordWFilter: async (_, { filter }, ctx) => {
             const { _id } = await ctx.req.user;
 
             if (!_id) {
                 throw new Error("세션이 만료되었습니다.");
             }
 
-            console.log(filter)
+            console.log(filter);
 
-            return await Password.find({$or:[{"id":filter},{"url":filter},{"site":filter},{"description":filter}]});
+            return await Password.find({
+                $or: [
+                    { id: filter },
+                    { url: filter },
+                    { site: filter },
+                    { description: filter }
+                ]
+            });
         }
     },
 
@@ -53,6 +83,8 @@ export default {
             if (!_id) {
                 throw new Error("세션이 만료되었습니다.");
             }
+            const cryptr = new Cryptr(process.env.password_sort);
+            const pass = cryptr.encrypt(password);
 
             // 패스워드 객체 생성
             const pPassword = new Password({
@@ -60,9 +92,8 @@ export default {
                 site,
                 url,
                 id,
-                password,
-                description,
-                password: password
+                password: pass,
+                description
             });
 
             if (await pPassword.save()) {
