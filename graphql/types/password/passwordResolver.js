@@ -22,29 +22,29 @@ export default {
         // 모든 패스워드 리스트를 불러옵니다.
         getPasswordList: async (_, args, ctx) => {
             try {
-                const { _id } = await ctx.req.user;
-
-                if (!_id) {
-                    throw new Error("세션이 만료되었습니다.");
-                }
+                // const { _id } = await ctx.req.user;
+                const _id = "5d6113500169a463083e6206";
+                // if (!_id) {
+                //     throw new Error("세션이 만료되었습니다.");
+                // }
 
                 const cryptr = new Cryptr(process.env.password_sort);
 
-                return await Password.find({ user: _id }, function(err, res) {
-                    if (err) {
-                        return new Error("리스트 에러");
-                    }
+                let result = null;
 
-                    const result = res.map(item => ({
-                        ...item,
-                        _doc: {
-                            ...item._doc,
-                            password: cryptr.decrypt(item.password)
-                        }
-                    }));
+                result = await Password.find({ user: _id });
 
-                    console.log(result);
-                });
+                result = result.map(item => ({
+                    _id: item._id,
+                    user: item.user,
+                    site: item.site,
+                    url: item.url,
+                    description: item.description,
+                    id: item.id,
+                    password: cryptr.decrypt(item.password)
+                }));
+
+                return result;
             } catch (e) {
                 return e;
             }
@@ -114,9 +114,24 @@ export default {
         },
 
         // 정보 수정
-        deletePassword: async (_, { pId }) => {
-            console.log(pId);
-            return true;
+        deletePassword: async (_, { pId }, ctx) => {
+            try {
+                const { _id } = await ctx.req.user;
+
+                if (!_id) {
+                    throw new Error("세션이 만료되었습니다.");
+                }
+
+                await Password.deleteOne({ _id: pId }, function(err) {
+                    if (err) {
+                        return new Error(err);
+                    }
+                });
+
+                return true;
+            } catch (e) {
+                return e;
+            }
         }
     }
 };

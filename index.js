@@ -7,6 +7,7 @@ import auth from "./graphql/middleware/auth";
 import permission from "./graphql/middleware/permission";
 import dotenv from "dotenv";
 import ms from "ms";
+import cors from "cors";
 
 // .env 파일
 dotenv.config();
@@ -46,6 +47,9 @@ const server = new GraphQLServer({
     middlewares: [permission],
     context: context
 });
+
+// CORS 오류 떄문에 넣어놓음
+server.express.use(cors());
 
 // 정적 이미지를 사용하기 위해서 적어놓음
 server.express.use("/password", express.static("statics"));
