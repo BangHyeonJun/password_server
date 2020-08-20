@@ -7,7 +7,7 @@
     "author": "BangHyeonJun <bhj2849@naver.com>",
     "license": "MIT",
     "dependencies": {
-        "bcrypt": "^3.0.6",
+        "bcrypt": "^5.0.0",
         "cors": "^2.8.5",
         "cryptr": "^4.0.2",
         "dotenv": "^8.0.0",
