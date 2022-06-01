@@ -24,7 +24,7 @@
         "mongoose": "^5.5.11",
         "ms": "^2.1.2",
         "randomstring": "^1.1.5",
-        "sharp": "^0.23.0"
+        "sharp": "^0.30.5"
     },
     "scripts": {
         "start": "nodemon --exec babel-node index.js",
